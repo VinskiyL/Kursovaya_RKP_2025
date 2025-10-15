@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/newDB?currentSchema=kursovaya
+    username: postgres
+    password: 1234
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    # Эта настройка позволяет Hibernate автоматически обновлять схему БД
+    hibernate:
+      ddl-auto: update
+    # Показывать выполняемые SQL-запросы в консоли (удобно для разработки)
+    show-sql: true
+    # Правильный диалект для PostgreSQL
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
