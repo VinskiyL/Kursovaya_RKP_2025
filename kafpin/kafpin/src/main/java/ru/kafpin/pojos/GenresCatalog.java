@@ -1,5 +1,6 @@
 package ru.kafpin.pojos;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.util.ArrayList;
@@ -19,5 +20,6 @@ public class GenresCatalog {
     private String name;
 
     @OneToMany(mappedBy = "genre", cascade = CascadeType.ALL)
+    @JsonBackReference
     private List<BooksGenres> booksGenres = new ArrayList<>();
 }

@@ -1,5 +1,6 @@
 package ru.kafpin.pojos;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 
@@ -15,9 +16,11 @@ public class BooksGenres {
 
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
+    @JsonManagedReference
     private BooksCatalog book;
 
     @ManyToOne
     @JoinColumn(name = "genre_id", nullable = false)
+    @JsonManagedReference
     private GenresCatalog genre;
 }

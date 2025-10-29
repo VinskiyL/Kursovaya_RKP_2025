@@ -1,5 +1,6 @@
 package ru.kafpin.pojos;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class Comments {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonManagedReference
     private ReadersCatalog user;
 
     @Column(name = "created_at", nullable = false)

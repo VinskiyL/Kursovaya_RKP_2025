@@ -1,5 +1,6 @@
 package ru.kafpin.pojos;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -31,9 +32,11 @@ public class BookingCatalog {
 
     @ManyToOne
     @JoinColumn(name = "index_id", nullable = false)
+    @JsonManagedReference
     private BooksCatalog book;
 
     @ManyToOne
     @JoinColumn(name = "reader_id", nullable = false)
+    @JsonManagedReference
     private ReadersCatalog reader;
 }

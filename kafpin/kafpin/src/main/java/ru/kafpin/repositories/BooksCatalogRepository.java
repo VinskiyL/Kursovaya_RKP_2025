@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface BooksCatalogRepository extends JpaRepository<BooksCatalog, Long> {
-    // Пока пусто - базовые методы уже есть от JpaRepository
+
 }

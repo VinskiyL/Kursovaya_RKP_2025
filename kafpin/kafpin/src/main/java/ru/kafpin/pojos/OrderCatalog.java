@@ -1,5 +1,6 @@
 package ru.kafpin.pojos;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.*;
 import jakarta.persistence.*;
 
@@ -36,5 +37,6 @@ public class OrderCatalog {
 
     @ManyToOne
     @JoinColumn(name = "reader_id", nullable = false)
+    @JsonManagedReference
     private ReadersCatalog reader;
 }
