@@ -8,13 +8,14 @@ export const useBooks = () => {
 
   // Загрузка всех книг
   const loadBooks = async () => {
-    setLoading(true);
-    setError(null);
     try {
+      setLoading(true);
+      setError(null);
       const response = await bookService.getAll();
       setBooks(response.data);
     } catch (err) {
-      setError(err.message);
+      setError('Ошибка при загрузке книг');
+      console.error('Error loading books:', err);
     } finally {
       setLoading(false);
     }
@@ -24,10 +25,26 @@ export const useBooks = () => {
   const createBook = async (bookData) => {
     try {
       const response = await bookService.create(bookData);
+      await loadBooks();
       setBooks(prev => [...prev, response.data]);
       return response.data;
     } catch (err) {
-      setError(err.message);
+      setError('Ошибка при создании книги');
+      throw err;
+    }
+  };
+
+  // 🆕 ОБНОВЛЕНИЕ КНИГИ
+  const updateBook = async (id, bookData) => {
+    try {
+      const response = await bookService.update(id, bookData);
+      await loadBooks();
+      setBooks(prev => prev.map(book => 
+        book.id === id ? response.data : book
+      ));
+      return response.data;
+    } catch (err) {
+      setError('Ошибка при обновлении книги');
       throw err;
     }
   };
@@ -36,14 +53,15 @@ export const useBooks = () => {
   const deleteBook = async (id) => {
     try {
       await bookService.delete(id);
+      await loadBooks();
       setBooks(prev => prev.filter(book => book.id !== id));
     } catch (err) {
-      setError(err.message);
+      setError('Ошибка при удалении книги');
       throw err;
     }
   };
 
-  // Загружаем книги при монтировании компонента
+  // Загружаем книги при монтировании
   useEffect(() => {
     loadBooks();
   }, []);
@@ -53,6 +71,7 @@ export const useBooks = () => {
     loading,
     error,
     createBook,
+    updateBook, // 🆕 ДОБАВЛЯЕМ
     deleteBook,
     refreshBooks: loadBooks
   };

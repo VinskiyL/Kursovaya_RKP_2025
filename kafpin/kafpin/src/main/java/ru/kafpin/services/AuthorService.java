@@ -1,6 +1,9 @@
 package ru.kafpin.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.kafpin.dtos.AuthorCreateDTO;
+import ru.kafpin.dtos.AuthorUpdateDTO;
 import ru.kafpin.pojos.AuthorsCatalog;
 import ru.kafpin.repositories.AuthorsCatalogRepository;
 import org.springframework.stereotype.Service;
@@ -22,5 +25,34 @@ public class AuthorService {
 
     public AuthorsCatalog getAuthorById(Long id) {
         return authorRepository.findById(id).orElse(null);
+    }
+
+    public AuthorsCatalog createAuthor(AuthorCreateDTO authorDTO) {
+        AuthorsCatalog author = authorDTO.toEntity();
+        return authorRepository.save(author);
+    }
+
+    public AuthorsCatalog updateAuthor(Long id, AuthorUpdateDTO authorDTO) {
+        if (!id.equals(authorDTO.getId())) {
+            throw new IllegalArgumentException("ID в пути не совпадает с ID в теле запроса");
+        }
+
+        AuthorsCatalog existingAuthor = authorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + id + " не найден"));
+
+        authorDTO.updateEntity(existingAuthor);
+        return authorRepository.save(existingAuthor);
+    }
+
+    public void deleteAuthor(Long id) {
+        AuthorsCatalog author = authorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + id + " не найден"));
+
+        // Проверяем есть ли у автора книги
+        if (author.getAuthorsBooks() != null && !author.getAuthorsBooks().isEmpty()) {
+            throw new IllegalStateException("Нельзя удалить автора, у которого есть книги");
+        }
+
+        authorRepository.delete(author);
     }
 }

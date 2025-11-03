@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { BookList } from '../features/books/components/BookList';
+import { BookForm } from '../features/books/components/BookForm';
 import { useBooks } from '../hooks/useBooks';
 
 export const BooksPage = () => {
-  const { books, loading, error, createBook, deleteBook } = useBooks();
+  const { books, loading, error, createBook, updateBook, deleteBook } = useBooks();
   const [editingBook, setEditingBook] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
   const handleCreate = () => {
     setEditingBook(null);
@@ -29,15 +31,25 @@ export const BooksPage = () => {
 
   const handleFormSubmit = async (bookData) => {
     try {
+      setFormLoading(true);
+      
       if (editingBook) {
-        // TODO: Реализовать обновление
-        console.log('Обновляем книгу:', editingBook.id, bookData);
+        // 🆕 Редактирование книги
+        await updateBook(editingBook.id, {
+          id: editingBook.id,
+          ...bookData
+        });
       } else {
+        // Создание книги
         await createBook(bookData);
-        setShowCreateForm(false);
       }
+      
+      setShowCreateForm(false);
+      setEditingBook(null);
     } catch (err) {
       alert('Ошибка при сохранении книги');
+    } finally {
+      setFormLoading(false);
     }
   };
 
@@ -67,27 +79,19 @@ export const BooksPage = () => {
           style={{ zIndex: 1000 }}
         >
           <div 
-            className="bg-white p-6 rounded-lg w-96"
+            className="bg-white p-6 rounded-lg w-[90vw] max-w-4xl max-h-[90vh] overflow-y-auto"
             style={{ zIndex: 1001 }}
           >
             <h3 className="text-xl font-bold mb-4">
               {editingBook ? 'Редактировать книгу' : 'Создать книгу'}
             </h3>
-            <p className="mb-4">Форма будет здесь (следующий урок)</p>
-            <div className="flex gap-2 justify-end">
-              <button 
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                onClick={handleFormCancel}
-              >
-                Отмена
-              </button>
-              <button 
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                onClick={() => handleFormSubmit({})}
-              >
-                Сохранить
-              </button>
-            </div>
+            
+            <BookForm
+              book={editingBook}
+              onSubmit={handleFormSubmit}
+              onCancel={handleFormCancel}
+              loading={formLoading}
+            />
           </div>
         </div>
       )}

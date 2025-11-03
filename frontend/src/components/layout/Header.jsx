@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import logo from '../../assets/images/logo.png'; // 🆕 ИМПОРТИРУЕМ ЛОГО
 
 export const Header = () => {
   const location = useLocation();
@@ -14,10 +15,24 @@ export const Header = () => {
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">
-            Библиотека Кафедры
-          </h1>
+          {/* Лого и название - ОБНОВЛЕНО */}
+          <div className="flex items-center space-x-3">
+            {/* Собственное лого */}
+            <div className="flex-shrink-0">
+              <img 
+                src={logo} 
+                alt="Логотип библиотеки" 
+                className="w-16 h-16 object-cover rounded-lg" // 🆕 РАЗМЕР МОЖНО НАСТРОИТЬ
+              />
+            </div>
+            
+            {/* Название */}
+            <h1 className="text-2xl font-bold text-gray-800">
+              Библиотека
+            </h1>
+          </div>
           
+          {/* Навигация */}
           <nav className="flex space-x-6">
             {navItems.map((item) => (
               <Link

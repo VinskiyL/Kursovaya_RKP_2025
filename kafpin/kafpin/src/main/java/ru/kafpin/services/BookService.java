@@ -7,6 +7,11 @@ import ru.kafpin.pojos.BooksCatalog;
 import ru.kafpin.repositories.BooksCatalogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -47,9 +52,20 @@ public class BookService {
     }
 
     public void deleteBook(Long id) {
-        if (!bookRepository.existsById(id)) {
-            throw new EntityNotFoundException("Книга с ID " + id + " не найдена");
+        BooksCatalog book = bookRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Книга с ID " + id + " не найдена"));
+
+        // 🆕 Удаляем обложку если она есть
+        if (book.getCover() != null && !book.getCover().trim().isEmpty()) {
+            try {
+                Path coverPath = Paths.get(book.getCover());
+                Files.deleteIfExists(coverPath);
+            } catch (IOException e) {
+                // Логируем ошибку, но не прерываем удаление книги
+                System.err.println("Ошибка при удалении обложки: " + e.getMessage());
+            }
         }
-        bookRepository.deleteById(id);
+
+        bookRepository.delete(book);
     }
 }
