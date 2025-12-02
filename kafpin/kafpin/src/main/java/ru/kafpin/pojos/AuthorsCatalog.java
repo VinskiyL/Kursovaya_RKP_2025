@@ -1,6 +1,8 @@
 package ru.kafpin.pojos;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -26,6 +28,6 @@ public class AuthorsCatalog {
     private String authorPatronymic;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
-    @JsonBackReference
+    @JsonIgnore
     private List<AuthorsBooks> authorsBooks = new ArrayList<>();
 }

@@ -1,6 +1,8 @@
 package ru.kafpin.pojos;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,11 +18,23 @@ public class AuthorsBooks {
 
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
-    @JsonManagedReference
+    @JsonBackReference("author-books")
     private AuthorsCatalog author;
 
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
-    @JsonManagedReference
+    @JsonBackReference("book-authors")
     private BooksCatalog book;
+
+    @Transient
+    @JsonProperty("authorId")
+    public Long getAuthorId() {
+        return author != null ? author.getId() : null;
+    }
+
+    @Transient
+    @JsonProperty("bookId")
+    public Long getBookId() {
+        return book != null ? book.getId() : null;
+    }
 }
