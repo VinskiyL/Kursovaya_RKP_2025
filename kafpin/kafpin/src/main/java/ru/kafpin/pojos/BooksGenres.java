@@ -28,7 +28,7 @@ public class BooksGenres {
 
     @Transient
     @JsonProperty("genreId")
-    public Long getAuthorId() {
+    public Long getGenreId() {
         return genre != null ? genre.getId() : null;
     }
 

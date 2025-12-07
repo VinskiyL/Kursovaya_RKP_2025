@@ -1,6 +1,7 @@
 package ru.kafpin.dtos;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import ru.kafpin.pojos.AuthorsBooks;
 import ru.kafpin.pojos.AuthorsCatalog;
@@ -9,10 +10,10 @@ import ru.kafpin.pojos.BooksCatalog;
 @Data
 public class AuthorBookCreateDTO {
 
-    @NotBlank(message = "ID автора не может быть пустым")
+    @NotNull(message = "ID автора не может быть пустым")
     private Long author;
 
-    @NotBlank(message = "ID ниги не может быть пустым")
+    @NotNull(message = "ID ниги не может быть пустым")
     private Long book;
 
     public AuthorsBooks toEntity(AuthorsCatalog author, BooksCatalog book) {
