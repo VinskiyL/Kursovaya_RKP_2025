@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import ru.kafpin.dtos.BookCreateDTO;
 import ru.kafpin.dtos.BookUpdateDTO;
+import ru.kafpin.dtos.BookWithDetailsDTO;
 import ru.kafpin.pojos.AuthorsCatalog;
 import ru.kafpin.pojos.BooksCatalog;
 import ru.kafpin.pojos.GenresCatalog;
@@ -84,7 +85,6 @@ public class BookController {
     @PostMapping("/{bookId}/genres/{genreId}")
     @ResponseStatus(HttpStatus.CREATED)
     public void addGenreToBook(@PathVariable Long bookId, @PathVariable Long genreId) {
-        // Нужно будет добавить booksGenresService в BookController
         booksGenresService.addGenreToBook(bookId, genreId);
     }
 
@@ -98,5 +98,11 @@ public class BookController {
     @ResponseStatus(HttpStatus.OK)
     public List<GenresCatalog> getBookGenres(@PathVariable Long bookId) {
         return booksGenresService.getBookGenres(bookId);
+    }
+
+    @GetMapping("/with-details")
+    @ResponseStatus(HttpStatus.OK)
+    public List<BookWithDetailsDTO> getAllBooksWithDetails() {
+        return bookService.getAllBooksWithDetails();
     }
 }

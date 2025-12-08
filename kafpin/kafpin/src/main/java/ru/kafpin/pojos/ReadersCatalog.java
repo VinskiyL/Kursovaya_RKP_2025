@@ -1,7 +1,6 @@
 package ru.kafpin.pojos;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -91,14 +90,14 @@ public class ReadersCatalog {
     private Boolean isActive = true;
 
     @OneToMany(mappedBy = "reader")
-    @JsonManagedReference("reader-bookings")
+    @JsonIgnore
     private List<BookingCatalog> bookings = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
-    @JsonManagedReference("user-comments")
+    @JsonIgnore
     private List<Comments> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "reader")
-    @JsonManagedReference("reader-orders")
+    @JsonIgnore
     private List<OrderCatalog> orders = new ArrayList<>();
 }
