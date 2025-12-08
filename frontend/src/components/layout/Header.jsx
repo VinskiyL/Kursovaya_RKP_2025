@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import logo from '../../assets/images/logo.png'; // 🆕 ИМПОРТИРУЕМ ЛОГО
+import logo from '../../assets/images/logo.png'; 
 
 export const Header = () => {
   const location = useLocation();
@@ -9,20 +9,19 @@ export const Header = () => {
     { path: '/books', label: 'Книги' },
     { path: '/authors', label: 'Авторы' },
     { path: '/genres', label: 'Жанры' },
+    { path: '/bookings', label: 'Брони' },
   ];
 
   return (
     <header className="bg-white shadow-sm border-b">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          {/* Лого и название - ОБНОВЛЕНО */}
           <div className="flex items-center space-x-3">
-            {/* Собственное лого */}
             <div className="flex-shrink-0">
               <img 
                 src={logo} 
                 alt="Логотип библиотеки" 
-                className="w-16 h-16 object-cover rounded-lg" // 🆕 РАЗМЕР МОЖНО НАСТРОИТЬ
+                className="w-16 h-16 object-cover rounded-lg" 
               />
             </div>
             

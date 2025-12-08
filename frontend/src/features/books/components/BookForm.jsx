@@ -2,12 +2,20 @@ import { useState, useEffect } from 'react';
 import { Button } from '../../../components/ui/Button';
 import { FileUpload } from '../../../components/ui/FileUpload';
 import { fileService } from '../../../services/fileService';
+import { authorService } from '../../../services/authorService'; // 🆕 ДОБАВЛЯЕМ
+import { genreService } from '../../../services/genreService';   // 🆕 ДОБАВЛЯЕМ
+import { BookAuthorsManager } from './BookAuthorsManager';
+import { BookGenresManager } from './BookGenresManager';
 
 export const BookForm = ({ 
   book = null, 
   onSubmit, 
   onCancel, 
-  loading = false 
+  loading = false,
+  onAddAuthorToBook,
+  onRemoveAuthorFromBook,
+  onAddGenreToBook,
+  onRemoveGenreFromBook
 }) => {
   const [formData, setFormData] = useState({
     index: '',
@@ -24,9 +32,12 @@ export const BookForm = ({
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [oldCoverPath, setOldCoverPath] = useState(null); // 🆕 Храним старую обложку
+  const [oldCoverPath, setOldCoverPath] = useState(null);
+  
+  // 🆕 ЛОКАЛЬНЫЕ КОПИИ АВТОРОВ И ЖАНРОВ
+  const [localAuthors, setLocalAuthors] = useState([]);
+  const [localGenres, setLocalGenres] = useState([]);
 
-  // Заполняем форму при редактировании
   useEffect(() => {
     if (book) {
       setFormData({
@@ -42,13 +53,15 @@ export const BookForm = ({
         datePublication: book.datePublication || ''
       });
 
-      // Устанавливаем preview текущей обложки
+      // 🆕 ИНИЦИАЛИЗИРУЕМ ЛОКАЛЬНЫЕ СОСТОЯНИЯ РЕАЛЬНЫМИ ДАННЫМИ
+      setLocalAuthors(book.authors || []);
+      setLocalGenres(book.genres || []);
+
       if (book.cover) {
         setSelectedFile(`http://localhost:8080/${book.cover}`);
-        setOldCoverPath(book.cover); // 🆕 Сохраняем путь старой обложки
+        setOldCoverPath(book.cover);
       }
     } else {
-      // Сброс формы при создании новой книги
       setFormData({
         index: '',
         authorsMark: '',
@@ -61,20 +74,62 @@ export const BookForm = ({
         cover: '',
         datePublication: ''
       });
+      setLocalAuthors([]);
+      setLocalGenres([]);
       setSelectedFile(null);
-      setOldCoverPath(null); // 🆕 Сбрасываем старую обложку
+      setOldCoverPath(null);
     }
   }, [book]);
 
-  // 🆕 ФУНКЦИЯ ДЛЯ УДАЛЕНИЯ СТАРОЙ ОБЛОЖКИ
+  // 🆕 СИНХРОНИЗАЦИЯ С РЕАЛЬНЫМИ ДАННЫМИ ПРИ ИЗМЕНЕНИИ book
+  useEffect(() => {
+    if (book) {
+      // Обновляем localAuthors реальными данными из book.authors
+      // Но сохраняем порядок из localAuthors
+      const updatedAuthors = localAuthors.map(localAuthor => {
+        const realAuthor = book.authors?.find(a => a.id === localAuthor.id);
+        // Если есть реальные данные - используем их, иначе оставляем локальные
+        return realAuthor || localAuthor;
+      });
+      
+      // Добавляем авторов, которые есть в book.authors но нет в localAuthors
+      book.authors?.forEach(realAuthor => {
+        if (!updatedAuthors.some(a => a.id === realAuthor.id)) {
+          updatedAuthors.push(realAuthor);
+        }
+      });
+      
+      // Убираем дубликаты
+      const uniqueAuthors = Array.from(new Set(updatedAuthors.map(a => a.id)))
+        .map(id => updatedAuthors.find(a => a.id === id));
+      
+      setLocalAuthors(uniqueAuthors);
+      
+      // Аналогично для жанров
+      const updatedGenres = localGenres.map(localGenre => {
+        const realGenre = book.genres?.find(g => g.id === localGenre.id);
+        return realGenre || localGenre;
+      });
+      
+      book.genres?.forEach(realGenre => {
+        if (!updatedGenres.some(g => g.id === realGenre.id)) {
+          updatedGenres.push(realGenre);
+        }
+      });
+      
+      const uniqueGenres = Array.from(new Set(updatedGenres.map(g => g.id)))
+        .map(id => updatedGenres.find(g => g.id === id));
+      
+      setLocalGenres(uniqueGenres);
+    }
+  }, [book?.authors, book?.genres]); // 🆕 Следим только за authors и genres
+
   const deleteOldCover = async () => {
     if (oldCoverPath) {
       try {
         await fileService.deleteCover(oldCoverPath);
-        console.log('Старая обложка удалена:', oldCoverPath);
       } catch (err) {
         console.error('Ошибка при удалении старой обложки:', err);
-        // Не прерываем выполнение если удаление не удалось
       }
     }
   };
@@ -87,10 +142,8 @@ export const BookForm = ({
     }));
   };
 
-  // Обработчик выбора файла
   const handleFileSelect = async (file) => {
     if (!file) {
-      // Файл удален - удаляем и старую обложку если редактируем
       if (book && oldCoverPath) {
         await deleteOldCover();
         setOldCoverPath(null);
@@ -103,7 +156,6 @@ export const BookForm = ({
     try {
       setUploading(true);
       
-      // 🆕 УДАЛЯЕМ СТАРУЮ ОБЛОЖКУ ПЕРЕД ЗАГРУЗКОЙ НОВОЙ
       if (oldCoverPath) {
         await deleteOldCover();
       }
@@ -113,12 +165,116 @@ export const BookForm = ({
       
       setSelectedFile(`http://localhost:8080/${filePath}`);
       setFormData(prev => ({ ...prev, cover: filePath }));
-      setOldCoverPath(null); // 🆕 Сбрасываем т.к. старая удалена
+      setOldCoverPath(null);
     } catch (err) {
       alert('Ошибка при загрузке обложки');
       console.error('Upload error:', err);
     } finally {
       setUploading(false);
+    }
+  };
+
+  // 🆕 УЛУЧШЕННЫЙ ОБРАБОТЧИК ДОБАВЛЕНИЯ АВТОРА
+  const handleAddAuthor = async (bookId, authorId) => {
+    try {
+      // 1. ЗАГРУЖАЕМ ДАННЫЕ АВТОРА СРАЗУ
+      const authorResponse = await authorService.getById(authorId);
+      const authorData = authorResponse.data;
+      
+      // 2. СОЗДАЁМ ОБЪЕКТ АВТОРА С РЕАЛЬНЫМИ ДАННЫМИ
+      const newAuthor = {
+        id: authorData.id,
+        authorSurname: authorData.authorSurname || '',
+        authorName: authorData.authorName || '',
+        authorPatronymic: authorData.authorPatronymic || ''
+      };
+      
+      // 3. ДОБАВЛЯЕМ В ЛОКАЛЬНЫЙ СПИСОК (сразу с реальными данными!)
+      setLocalAuthors(prev => {
+        // Проверяем, не добавлен ли уже
+        if (prev.some(a => a.id === newAuthor.id)) {
+          return prev;
+        }
+        return [...prev, newAuthor];
+      });
+      
+      // 4. ОТПРАВЛЯЕМ ЗАПРОС НА БЭК
+      await onAddAuthorToBook(bookId, authorId);
+      
+    } catch (err) {
+      console.error('Ошибка при добавлении автора:', err);
+      
+      // Если ошибка - удаляем из локального списка
+      setLocalAuthors(prev => prev.filter(a => a.id !== authorId));
+      
+      alert('Ошибка при добавлении автора');
+      throw err;
+    }
+  };
+
+  // 🆕 УЛУЧШЕННЫЙ ОБРАБОТЧИК УДАЛЕНИЯ АВТОРА
+  const handleRemoveAuthor = async (bookId, authorId) => {
+    try {
+      // 1. УДАЛЯЕМ ИЗ ЛОКАЛЬНОГО СПИСКА СРАЗУ
+      setLocalAuthors(prev => prev.filter(author => author.id !== authorId));
+      
+      // 2. ОТПРАВЛЯЕМ ЗАПРОС НА БЭК
+      await onRemoveAuthorFromBook(bookId, authorId);
+      
+    } catch (err) {
+      console.error('Ошибка при удалении автора:', err);
+      alert('Ошибка при удалении автора');
+      throw err;
+    }
+  };
+
+  // 🆕 УЛУЧШЕННЫЙ ОБРАБОТЧИК ДОБАВЛЕНИЯ ЖАНРА
+  const handleAddGenre = async (bookId, genreId) => {
+    try {
+      // 1. ЗАГРУЖАЕМ ДАННЫЕ ЖАНРА СРАЗУ
+      const genreResponse = await genreService.getById(genreId);
+      const genreData = genreResponse.data;
+      
+      // 2. СОЗДАЁМ ОБЪЕКТ ЖАНРА С РЕАЛЬНЫМИ ДАННЫМИ
+      const newGenre = {
+        id: genreData.id,
+        name: genreData.name || ''
+      };
+      
+      // 3. ДОБАВЛЯЕМ В ЛОКАЛЬНЫЙ СПИСОК
+      setLocalGenres(prev => {
+        if (prev.some(g => g.id === newGenre.id)) {
+          return prev;
+        }
+        return [...prev, newGenre];
+      });
+      
+      // 4. ОТПРАВЛЯЕМ ЗАПРОС НА БЭК
+      await onAddGenreToBook(bookId, genreId);
+      
+    } catch (err) {
+      console.error('Ошибка при добавлении жанра:', err);
+      
+      setLocalGenres(prev => prev.filter(g => g.id !== genreId));
+      
+      alert('Ошибка при добавлении жанра');
+      throw err;
+    }
+  };
+
+  // 🆕 УЛУЧШЕННЫЙ ОБРАБОТЧИК УДАЛЕНИЯ ЖАНРА
+  const handleRemoveGenre = async (bookId, genreId) => {
+    try {
+      // 1. УДАЛЯЕМ ИЗ ЛОКАЛЬНОГО СПИСКА СРАЗУ
+      setLocalGenres(prev => prev.filter(genre => genre.id !== genreId));
+      
+      // 2. ОТПРАВЛЯЕМ ЗАПРОС НА БЭК
+      await onRemoveGenreFromBook(bookId, genreId);
+      
+    } catch (err) {
+      console.error('Ошибка при удалении жанра:', err);
+      alert('Ошибка при удалении жанра');
+      throw err;
     }
   };
 
@@ -151,7 +307,7 @@ export const BookForm = ({
         )}
       </div>
 
-      {/* Остальные поля (без изменений) */}
+      {/* Основные поля в две колонки */}
       <div className="grid grid-cols-2 gap-4">
         {/* Левая колонка */}
         <div className="space-y-4">
@@ -300,6 +456,34 @@ export const BookForm = ({
         </div>
       </div>
 
+      {/* СЕКЦИЯ ДЛЯ УПРАВЛЕНИЯ СВЯЗЯМИ */}
+      {book && (
+        <>
+          {/* Управление авторами */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <BookAuthorsManager
+              bookId={book.id}
+              currentAuthors={localAuthors}
+              onAddAuthor={handleAddAuthor}
+              onRemoveAuthor={handleRemoveAuthor}
+              disabled={loading || uploading}
+            />
+          </div>
+
+          {/* Управление жанрами */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <BookGenresManager
+              bookId={book.id}
+              currentGenres={localGenres}
+              onAddGenre={handleAddGenre}
+              onRemoveGenre={handleRemoveGenre}
+              disabled={loading || uploading}
+            />
+          </div>
+        </>
+      )}
+
+      {/* Кнопки */}
       <div className="flex gap-2 justify-end pt-4 border-t">
         <Button
           type="button"
@@ -313,7 +497,7 @@ export const BookForm = ({
           type="submit"
           disabled={loading || uploading}
         >
-          {book ? 'Обновить' : 'Создать'}
+          {book ? 'Обновить книгу' : 'Создать книгу'}
         </Button>
       </div>
     </form>
