@@ -38,7 +38,7 @@ export const useAuthors = () => {
   const updateAuthor = async (id, authorData) => {
     try {
       const response = await authorService.update(id, authorData);
-      await loadBooks();
+      await loadAuthors();
       setAuthors(prev => prev.map(author => 
         author.id === id ? response.data : author
       ));

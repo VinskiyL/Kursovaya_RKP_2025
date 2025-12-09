@@ -9,9 +9,6 @@ import ru.kafpin.pojos.GenresCatalog;
 @Data
 public class GenreUpdateDTO extends GenreCreateDTO {
 
-    @NotNull(message = "ID жанра не может быть пустым")
-    private Long id;
-
     public void updateEntity(GenresCatalog genre) {
         genre.setName(this.getName());
     }

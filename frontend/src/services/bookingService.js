@@ -1,25 +1,16 @@
 import api from './api';
 
 export const bookingService = {
-    /**
-     * Получить все бронирования
-     */
+
     getAll: () => api.get('/bookings'),
     
-    /**
-     * Выдать книгу (отметить как выданную)
-     */
     issue: (id) => api.put(`/bookings/${id}/issue`),
-    
-    /**
-     * Вернуть книгу (отметить как возвращённую)
-     */
+
     return: (id) => api.put(`/bookings/${id}/return`),
-    
-    /**
-     * Удалить бронирование
-     */
-    delete: (id) => api.delete(`/bookings/${id}`)
+
+    delete: (id) => api.delete(`/bookings/${id}`),
+
+    update: (id, data) => api.put(`/bookings/${id}`, data)
 };
 
 export default bookingService;

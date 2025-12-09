@@ -1,12 +1,14 @@
+import { AuthorRow } from './AuthorRow';
 import { Button } from '../../../components/ui/Button';
 
 export const AuthorList = ({ 
   authors, 
   loading, 
   error, 
-  onEdit, 
-  onDelete, 
-  onCreate 
+  onCreate, 
+  onUpdate, 
+  onDelete,
+  isLoading 
 }) => {
   if (loading) {
     return (
@@ -31,17 +33,15 @@ export const AuthorList = ({
     );
   }
 
-  const getFullName = (author) => {
-    const parts = [author.authorSurname, author.authorName, author.authorPatronymic];
-    return parts.filter(part => part && part.trim() !== '').join(' ');
-  };
-
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Заголовок и кнопка создания */}
       <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h2 className="text-xl font-semibold">Авторы</h2>
-        <Button onClick={onCreate}>
+        <Button 
+          onClick={onCreate}
+          disabled={isLoading}
+        >
           + Добавить автора
         </Button>
       </div>
@@ -54,31 +54,13 @@ export const AuthorList = ({
       ) : (
         <div className="divide-y divide-gray-200">
           {authors.map((author) => (
-            <div key={author.id} className="px-6 py-4 flex justify-between items-center">
-              <div>
-                <div className="font-medium text-gray-900">
-                  {getFullName(author)}
-                </div>
-                <div className="text-sm text-gray-500">
-                  ID: {author.id}
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => onEdit(author)}
-                >
-                  Редактировать
-                </Button>
-                <Button 
-                  variant="danger" 
-                  onClick={() => onDelete(author.id)}
-                >
-                  Удалить
-                </Button>
-              </div>
-            </div>
+            <AuthorRow
+              key={author.id}
+              author={author}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              isLoading={isLoading}
+            />
           ))}
         </div>
       )}

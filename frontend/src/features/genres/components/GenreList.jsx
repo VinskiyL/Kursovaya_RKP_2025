@@ -1,12 +1,14 @@
+import { GenreRow } from './GenreRow';
 import { Button } from '../../../components/ui/Button';
 
 export const GenreList = ({ 
   genres, 
   loading, 
   error, 
-  onEdit, 
-  onDelete, 
-  onCreate 
+  onCreate, 
+  onUpdate, 
+  onDelete,
+  isLoading 
 }) => {
   if (loading) {
     return (
@@ -36,7 +38,10 @@ export const GenreList = ({
       {/* Заголовок и кнопка создания */}
       <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
         <h2 className="text-xl font-semibold">Жанры</h2>
-        <Button onClick={onCreate}>
+        <Button 
+          onClick={onCreate}
+          disabled={isLoading}
+        >
           + Добавить жанр
         </Button>
       </div>
@@ -49,31 +54,13 @@ export const GenreList = ({
       ) : (
         <div className="divide-y divide-gray-200">
           {genres.map((genre) => (
-            <div key={genre.id} className="px-6 py-4 flex justify-between items-center">
-              <div>
-                <div className="font-medium text-gray-900">
-                  {genre.name}
-                </div>
-                <div className="text-sm text-gray-500">
-                  ID: {genre.id}
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  variant="secondary" 
-                  onClick={() => onEdit(genre)}
-                >
-                  Редактировать
-                </Button>
-                <Button 
-                  variant="danger" 
-                  onClick={() => onDelete(genre.id)}
-                >
-                  Удалить
-                </Button>
-              </div>
-            </div>
+            <GenreRow
+              key={genre.id}
+              genre={genre}
+              onUpdate={onUpdate}
+              onDelete={onDelete}
+              isLoading={isLoading}
+            />
           ))}
         </div>
       )}

@@ -25,7 +25,7 @@ export const useGenres = () => {
   const createGenre = async (genreData) => {
     try {
       const response = await genreService.create(genreData);
-      await loadBooks();
+      await loadGenres();
       setGenres(prev => [...prev, response.data]);
       return response.data;
     } catch (err) {
@@ -38,7 +38,7 @@ export const useGenres = () => {
   const updateGenre = async (id, genreData) => {
     try {
       const response = await genreService.update(id, genreData);
-      await loadBooks();
+      await loadGenres();
       setGenres(prev => prev.map(genre => 
         genre.id === id ? response.data : genre
       ));
@@ -53,7 +53,7 @@ export const useGenres = () => {
   const deleteGenre = async (id) => {
     try {
       await genreService.delete(id);
-      await loadBooks();
+      await loadGenres();
       setGenres(prev => prev.filter(genre => genre.id !== id));
     } catch (err) {
       setError('Ошибка при удалении жанра');

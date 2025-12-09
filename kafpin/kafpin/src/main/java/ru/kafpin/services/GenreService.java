@@ -34,10 +34,6 @@ public class GenreService {
     }
 
     public GenresCatalog updateGenre(Long id, GenreUpdateDTO genreDTO) {
-        if (!id.equals(genreDTO.getId())) {
-            throw new IllegalArgumentException("ID в пути не совпадает с ID в теле запроса");
-        }
-
         GenresCatalog existingGenre = genreRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Жанр с ID " + id + " не найден"));
 

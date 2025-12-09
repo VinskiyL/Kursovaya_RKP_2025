@@ -33,9 +33,6 @@ public class AuthorService {
     }
 
     public AuthorsCatalog updateAuthor(Long id, AuthorUpdateDTO authorDTO) {
-        if (!id.equals(authorDTO.getId())) {
-            throw new IllegalArgumentException("ID в пути не совпадает с ID в теле запроса");
-        }
 
         AuthorsCatalog existingAuthor = authorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + id + " не найден"));

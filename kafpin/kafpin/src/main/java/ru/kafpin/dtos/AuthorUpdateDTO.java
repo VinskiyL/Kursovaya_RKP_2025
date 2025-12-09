@@ -9,9 +9,6 @@ import ru.kafpin.pojos.AuthorsCatalog;
 @Data
 public class AuthorUpdateDTO extends AuthorCreateDTO{
 
-    @NotNull(message = "ID автора не может быть пустым")
-    private Long id;
-
     public void updateEntity(AuthorsCatalog author) {
         author.setAuthorSurname(this.getAuthorSurname());
         author.setAuthorName(this.getAuthorName());
