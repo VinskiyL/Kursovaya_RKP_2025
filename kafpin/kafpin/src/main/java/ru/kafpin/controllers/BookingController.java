@@ -26,25 +26,21 @@ public class BookingController {
         return bookingService.getAllBookingsDTO();
     }
 
-    // ✅ СУЩЕСТВУЮЩИЙ: выдать книгу (без исправления даты)
     @PutMapping("/{id}/issue")
     public BookingResponseDTO issueBooking(@PathVariable Long id) {
         return bookingService.issueBooking(id);
     }
 
-    // 🆕 НОВЫЙ: выдать книгу с возможностью исправления даты
     @PutMapping("/{id}/issue-with-fix")
     public BookingResponseDTO issueBookingWithDateFix(@PathVariable Long id) {
         return bookingService.issueBookingWithDateFix(id);
     }
 
-    // ✅ СУЩЕСТВУЮЩИЙ: вернуть книгу
     @PutMapping("/{id}/return")
     public BookingResponseDTO returnBooking(@PathVariable Long id) {
         return bookingService.returnBooking(id);
     }
 
-    // 🆕 НОВЫЙ: обновить бронь (количество, даты)
     @PutMapping("/{id}")
     public BookingResponseDTO updateBooking(
             @PathVariable Long id,
@@ -52,7 +48,6 @@ public class BookingController {
         return bookingService.updateBooking(id, updateDTO);
     }
 
-    // ✅ СУЩЕСТВУЮЩИЙ: удалить бронь
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBooking(@PathVariable Long id) {

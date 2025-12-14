@@ -45,7 +45,6 @@ public class AuthorService {
         AuthorsCatalog author = authorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + id + " не найден"));
 
-        // Проверяем есть ли у автора книги
         if (author.getAuthorsBooks() != null && !author.getAuthorsBooks().isEmpty()) {
             throw new IllegalStateException("Нельзя удалить автора, у которого есть книги");
         }

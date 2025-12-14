@@ -24,12 +24,10 @@ public class BookingService {
         this.bookingRepository = bookingRepository;
     }
 
-    // Старый метод (оставляем для совместимости)
     public List<BookingCatalog> getAllBookings() {
         return bookingRepository.findAll();
     }
 
-    // ✅ НОВЫЙ: получение всех броней как DTO
     public List<BookingResponseDTO> getAllBookingsDTO() {
         List<BookingCatalog> bookings = bookingRepository.findAll();
         return bookings.stream()
@@ -37,7 +35,6 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
-    // ✅ КОНВЕРТАЦИЯ: Entity → DTO
     private BookingResponseDTO convertToDTO(BookingCatalog booking) {
         BookingResponseDTO dto = new BookingResponseDTO();
         dto.setId(booking.getId());
@@ -47,14 +44,12 @@ public class BookingService {
         dto.setIssued(booking.getIssued());
         dto.setReturned(booking.getReturned());
 
-        // Берем данные книги из связанной сущности
         BooksCatalog book = booking.getBook();
         if (book != null) {
             dto.setBookId(book.getId());
             dto.setBookTitle(book.getTitle());
         }
 
-        // Берем данные читателя из связанной сущности
         ReadersCatalog reader = booking.getReader();
         if (reader != null) {
             dto.setReaderId(reader.getId());
@@ -71,7 +66,6 @@ public class BookingService {
         return dto;
     }
 
-    // ✅ ВЫДАТЬ КНИГУ
     public BookingResponseDTO issueBooking(Long id) {
         BookingCatalog booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Бронь с ID " + id + " не найдена"));
@@ -85,7 +79,6 @@ public class BookingService {
         return convertToDTO(saved);
     }
 
-    // ✅ ВЕРНУТЬ КНИГУ
     public BookingResponseDTO returnBooking(Long id) {
         BookingCatalog booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Бронь с ID " + id + " не найдена"));
@@ -102,7 +95,6 @@ public class BookingService {
         return convertToDTO(saved);
     }
 
-    // ✅ УДАЛИТЬ БРОНЬ
     public void deleteBooking(Long id) {
         BookingCatalog booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Бронь с ID " + id + " не найдена"));
@@ -118,25 +110,18 @@ public class BookingService {
         BookingCatalog booking = bookingRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Бронь с ID " + id + " не найдена"));
 
-        // 1. Нельзя редактировать выданную книгу
         if (booking.getIssued()) {
             throw new IllegalStateException("Нельзя редактировать выданную книгу");
         }
 
-        // 2. Проверка дубликатов (опционально - если успеем)
-        // Можно добавить позже
-
-        // 3. Обновляем поля
         booking.setQuantity(updateDTO.getQuantity());
         booking.setDateIssue(updateDTO.getDateIssue());
         booking.setDateReturn(updateDTO.getDateReturn());
 
-        // 4. Дополнительная валидация (на всякий случай)
         if (updateDTO.getDateReturn().isBefore(updateDTO.getDateIssue())) {
             throw new IllegalArgumentException("Дата возврата не может быть раньше даты выдачи");
         }
 
-        // 5. Сохраняем (триггеры проверят остальное)
         BookingCatalog saved = bookingRepository.save(booking);
         return convertToDTO(saved);
     }
@@ -149,11 +134,9 @@ public class BookingService {
             throw new IllegalStateException("Книга уже выдана");
         }
 
-        // 🔧 Исправляем дату если она в прошлом
         LocalDate today = LocalDate.now();
         if (booking.getDateIssue().isBefore(today)) {
             booking.setDateIssue(today);
-            // Можно также логировать это действие
             System.out.println("Исправлена дата выдачи для брони ID=" + id +
                     " с " + booking.getDateIssue() + " на " + today);
         }

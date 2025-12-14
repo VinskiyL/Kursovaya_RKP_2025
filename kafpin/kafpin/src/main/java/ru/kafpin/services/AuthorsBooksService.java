@@ -41,14 +41,12 @@ public class AuthorsBooksService {
     }
 
     public void addAuthorToBook(Long bookId, Long authorId) {
-        // Проверяем существование книги и автора
         BooksCatalog book = booksCatalogRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Книга с ID " + bookId + " не найдена"));
 
         AuthorsCatalog author = authorsCatalogRepository.findById(authorId)
                 .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + authorId + " не найден"));
 
-        // Проверяем нет ли уже такой связи
         boolean relationExists = authorsBooksRepository.findAll().stream()
                 .anyMatch(ab -> ab.getBook().getId().equals(bookId) &&
                         ab.getAuthor().getId().equals(authorId));
@@ -57,7 +55,6 @@ public class AuthorsBooksService {
             throw new IllegalStateException("Автор уже связан с этой книгой");
         }
 
-        // Создаем новую связь
         AuthorsBooks authorsBooks = new AuthorsBooks();
         authorsBooks.setBook(book);
         authorsBooks.setAuthor(author);
@@ -66,7 +63,6 @@ public class AuthorsBooksService {
     }
 
     public void removeAuthorFromBook(Long bookId, Long authorId) {
-        // Находим связь для удаления
         AuthorsBooks relation = authorsBooksRepository.findAll().stream()
                 .filter(ab -> ab.getBook().getId().equals(bookId) &&
                         ab.getAuthor().getId().equals(authorId))
