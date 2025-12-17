@@ -1,6 +1,7 @@
 package ru.kafpin.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kafpin.dtos.*;
 import ru.kafpin.pojos.AuthorsCatalog;
 import ru.kafpin.pojos.BooksCatalog;
@@ -41,11 +42,13 @@ public class BookService {
                 .orElseThrow(() -> new EntityNotFoundException("Книга с ID " + id + " не найдена"));
     }
 
+    @Transactional
     public BooksCatalog createBook(BookCreateDTO bookDTO) {
         BooksCatalog book = bookDTO.toEntity();
         return bookRepository.save(book);
     }
 
+    @Transactional
     public BooksCatalog updateBook(Long id, BookUpdateDTO bookDTO) {
         if (!id.equals(bookDTO.getId())) {
             throw new IllegalArgumentException("ID в пути не совпадает с ID в теле запроса");
@@ -59,6 +62,7 @@ public class BookService {
         return bookRepository.save(existingBook);
     }
 
+    @Transactional
     public void deleteBook(Long id) {
         BooksCatalog book = bookRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Книга с ID " + id + " не найдена"));

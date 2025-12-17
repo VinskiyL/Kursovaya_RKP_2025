@@ -1,5 +1,7 @@
 package ru.kafpin.exceptions;
 
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,7 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleEntityNotFound(EntityNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error); // ← 404 вместо 500
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -30,5 +32,36 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+    }
+
+    @ExceptionHandler({IllegalStateException.class, IllegalArgumentException.class})
+    public ResponseEntity<ErrorResponse> handleBusinessLogicExceptions(RuntimeException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            DataIntegrityViolationException ex) {
+        String message = "Ошибка базы данных";
+        if (ex.getCause() instanceof ConstraintViolationException) {
+            ConstraintViolationException cve = (ConstraintViolationException) ex.getCause();
+            if (cve.getConstraintViolations() != null &&
+                    cve.getConstraintViolations().contains("quantity")) {
+                message = "Недостаточно книг в наличии";
+            }
+        }
+        ErrorResponse error = new ErrorResponse(message);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<ErrorResponse> handleAnyUncaughtException(Throwable ex) {
+        System.err.println("=== НЕОБРАБОТАННАЯ ОШИБКА ===");
+        ex.printStackTrace();
+        System.err.println("=============================");
+
+        ErrorResponse error = new ErrorResponse("Упс, что-то пошло не так. Попробуйте позже.");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
 }

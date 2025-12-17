@@ -2,6 +2,7 @@ package ru.kafpin.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kafpin.dtos.GenreCreateDTO;
 import ru.kafpin.dtos.GenreUpdateDTO;
 import ru.kafpin.pojos.GenresCatalog;
@@ -28,11 +29,13 @@ public class GenreService {
                 .orElseThrow(() -> new EntityNotFoundException("Жанр с ID " + id + " не найден"));
     }
 
+    @Transactional
     public GenresCatalog createGenre(GenreCreateDTO genreDTO) {
         GenresCatalog genre = genreDTO.toEntity();
         return genreRepository.save(genre);
     }
 
+    @Transactional
     public GenresCatalog updateGenre(Long id, GenreUpdateDTO genreDTO) {
         GenresCatalog existingGenre = genreRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Жанр с ID " + id + " не найден"));
@@ -41,6 +44,7 @@ public class GenreService {
         return genreRepository.save(existingGenre);
     }
 
+    @Transactional
     public void deleteGenre(Long id) {
         GenresCatalog genre = genreRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Жанр с ID " + id + " не найден"));

@@ -2,6 +2,7 @@ package ru.kafpin.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kafpin.pojos.BooksCatalog;
 import ru.kafpin.pojos.BooksGenres;
 import ru.kafpin.pojos.GenresCatalog;
@@ -31,6 +32,7 @@ public class BooksGenresService {
         return booksGenresRepository.findAll();
     }
 
+    @Transactional
     public void addGenreToBook(Long bookId, Long genreId) {
         // Проверяем существование книги и жанра
         BooksCatalog book = booksCatalogRepository.findById(bookId)
@@ -56,6 +58,7 @@ public class BooksGenresService {
         booksGenresRepository.save(booksGenres);
     }
 
+    @Transactional
     public void removeGenreFromBook(Long bookId, Long genreId) {
         // Находим связь для удаления
         BooksGenres relation = booksGenresRepository.findAll().stream()
@@ -67,7 +70,6 @@ public class BooksGenresService {
         booksGenresRepository.delete(relation);
     }
 
-    // 🆕 Получить жанры книги
     public List<GenresCatalog> getBookGenres(Long bookId) {
         // Пока простой способ - потом можно оптимизировать через @Query
         return booksGenresRepository.findAll().stream()

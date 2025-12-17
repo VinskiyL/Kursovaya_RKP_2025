@@ -23,4 +23,9 @@ public class ReaderService {
     public ReadersCatalog getReaderById(Long id) {
         return readerRepository.findById(id).orElse(null);
     }
+
+    public ReadersCatalog findByLogin(String login) {
+        return readerRepository.findByLogin(login)
+                .orElseThrow(() -> new RuntimeException("Читатель не найден"));
+    }
 }

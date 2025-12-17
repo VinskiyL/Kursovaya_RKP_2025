@@ -2,6 +2,7 @@ package ru.kafpin.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kafpin.dtos.AuthorCreateDTO;
 import ru.kafpin.dtos.AuthorUpdateDTO;
 import ru.kafpin.pojos.AuthorsCatalog;
@@ -27,11 +28,13 @@ public class AuthorService {
         return authorRepository.findById(id).orElse(null);
     }
 
+    @Transactional
     public AuthorsCatalog createAuthor(AuthorCreateDTO authorDTO) {
         AuthorsCatalog author = authorDTO.toEntity();
         return authorRepository.save(author);
     }
 
+    @Transactional
     public AuthorsCatalog updateAuthor(Long id, AuthorUpdateDTO authorDTO) {
 
         AuthorsCatalog existingAuthor = authorRepository.findById(id)
@@ -41,6 +44,7 @@ public class AuthorService {
         return authorRepository.save(existingAuthor);
     }
 
+    @Transactional
     public void deleteAuthor(Long id) {
         AuthorsCatalog author = authorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Автор с ID " + id + " не найден"));

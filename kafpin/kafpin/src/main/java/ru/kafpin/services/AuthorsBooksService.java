@@ -2,6 +2,7 @@ package ru.kafpin.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import ru.kafpin.pojos.AuthorsBooks;
 import ru.kafpin.pojos.AuthorsCatalog;
 import ru.kafpin.pojos.BooksCatalog;
@@ -40,6 +41,7 @@ public class AuthorsBooksService {
         return authors;
     }
 
+    @Transactional
     public void addAuthorToBook(Long bookId, Long authorId) {
         BooksCatalog book = booksCatalogRepository.findById(bookId)
                 .orElseThrow(() -> new EntityNotFoundException("Книга с ID " + bookId + " не найдена"));
@@ -62,6 +64,7 @@ public class AuthorsBooksService {
         authorsBooksRepository.save(authorsBooks);
     }
 
+    @Transactional
     public void removeAuthorFromBook(Long bookId, Long authorId) {
         AuthorsBooks relation = authorsBooksRepository.findAll().stream()
                 .filter(ab -> ab.getBook().getId().equals(bookId) &&
