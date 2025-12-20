@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/books-genres")
-@CrossOrigin(origins = "http://localhost:5173")
 public class BooksGenresController {
 
     private final BooksGenresService booksGenresService;
