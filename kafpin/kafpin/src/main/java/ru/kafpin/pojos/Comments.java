@@ -2,6 +2,7 @@ package ru.kafpin.pojos;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -26,4 +27,16 @@ public class Comments {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Transient
+    @JsonProperty("userId")
+    public Long getUserId() {
+        return user != null ? user.getId() : null;
+    }
+
+    @Transient
+    @JsonProperty("login")
+    public String getLogin() {
+        return user != null ? user.getLogin() : null;
+    }
 }
