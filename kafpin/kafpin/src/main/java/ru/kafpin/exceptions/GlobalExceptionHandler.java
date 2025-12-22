@@ -4,6 +4,7 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.kafpin.exceptions.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,6 +54,24 @@ public class GlobalExceptionHandler {
         }
         ErrorResponse error = new ErrorResponse(message);
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleUsernameNotFound(UsernameNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<ErrorResponse> handleEmailException(EmailException ex) {
+        System.err.println("📧 ОШИБКА EMAIL: " + ex.getMessage());
+        if (ex.getCause() != null) {
+            ex.getCause().printStackTrace();
+        }
+
+        // Просто логируем и возвращаем успех
+        ErrorResponse error = new ErrorResponse("Уведомление не отправлено (внутренняя ошибка)");
+        return ResponseEntity.status(HttpStatus.OK).body(error); // ← 200 OK!
     }
 
     @ExceptionHandler(Throwable.class)

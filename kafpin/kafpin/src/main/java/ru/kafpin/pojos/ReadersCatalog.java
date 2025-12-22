@@ -100,4 +100,12 @@ public class ReadersCatalog {
     @OneToMany(mappedBy = "reader")
     @JsonIgnore
     private List<OrderCatalog> orders = new ArrayList<>();
+
+    public String getFullName() {
+        String fullName = surname + " " + name;
+        if (patronymic != null && !patronymic.trim().isEmpty()) {
+            fullName += " " + patronymic;
+        }
+        return fullName.trim();
+    }
 }
