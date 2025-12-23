@@ -13,10 +13,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import ru.kafpin.config.CookieUtil;
 import ru.kafpin.config.JwtService;
-import ru.kafpin.dtos.AuthResponse;
-import ru.kafpin.dtos.LoginRequest;
-import ru.kafpin.dtos.RefreshTokenRequest;
+import ru.kafpin.dtos.*;
 import ru.kafpin.pojos.ReadersCatalog;
+import ru.kafpin.services.ReaderService;
 import ru.kafpin.services.ReadersCatalogDetailsService;
 
 @RestController
@@ -28,6 +27,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final ReadersCatalogDetailsService userDetailsService;
     private final CookieUtil cookieUtil;
+    private final ReaderService readerService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(
@@ -127,5 +127,11 @@ public class AuthController {
         String username = authentication.getName();
         ReadersCatalog reader = userDetailsService.loadReaderByUsername(username);
         return ResponseEntity.ok(reader);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody RegistrationRequestDTO request) {
+        UserResponse response = readerService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
